@@ -13,14 +13,14 @@ const router = express.Router();
  * (In production this will come from session, but dev uses header)
  */
 router.use(async (req, res, next) => {
-  req.storeURL = req.query.shop
-  next();
+  req.storeURL = req.query?.shop || res.locals?.shopify?.session?.shop
+  return next();
 });
 
 /** GET store’s timer */
 router.get("/", async (req, res) => {
   try {
-    const timer = await getTimersForStore(req.storeURL);
+    const timer = await getTimersForStore(req.storeURL, req.query.sortBy);
     res.json(timer || null);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -48,9 +48,9 @@ router.put("/", async (req, res) => {
 });
 
 /** DELETE remove timer */
-router.delete("/", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    await deleteTimer(req.storeURL);
+    await deleteTimer(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(404).json({ error: err.message });

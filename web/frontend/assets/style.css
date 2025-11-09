@@ -1,0 +1,21 @@
+.custom-black-btn {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.custom-black-btn svg {
+  fill: #fff !important;
+}
+
+.custom-black-btn:hover {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+}
+
+.custom-black-btn:active {
+  background-color: #333 !important;
+}

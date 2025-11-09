@@ -5,13 +5,30 @@ import { validateTimerInput, validateTimerUpdate } from "../services/timer.valid
 export async function createTimer(storeUrl, data) {
   validateTimerInput(data);
 
-  await Timer.deleteMany({ storeUrl }); // ensure only one
+  // await Timer.deleteMany({ storeUrl }); // ensure only one
   return await Timer.create({ ...data, storeUrl });
 }
 
 /** Get the store’s timer (admin) */
-export async function getTimersForStore(storeUrl) {
-  return await Timer.find({ storeUrl });
+export async function getTimersForStore(storeUrl, sortBy) {
+  let sort = {};
+
+  switch (sortBy) {
+    case "oldest":
+      sort = { createdAt: 1 };
+      break;
+    case "startDate":
+      sort = { startDate: 1 };
+      break;
+    case "endDate":
+      sort = { endDate: 1 };
+      break;
+    default:
+      sort = { createdAt: -1 };
+      break;
+  }
+
+  return await Timer.find({ storeUrl }).sort(sort);
 }
 
 /** Get active timer (storefront) */
@@ -33,8 +50,8 @@ export async function updateTimer(storeUrl, data) {
 }
 
 /** Delete timer */
-export async function deleteTimer(storeUrl) {
-  const deleted = await Timer.findOneAndDelete({ storeUrl });
+export async function deleteTimer(id) {
+  const deleted = await Timer.findByIdAndDelete(id);
   if (!deleted) throw new Error("Timer not found");
   return deleted;
 }

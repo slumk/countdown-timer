@@ -80,8 +80,8 @@ app.post("/api/products", async (_req, res) => {
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 app.use(errorHandler)
-app.use(AdminTimeRouter)
-app.use(StoreFrontRouter)
+app.use('/api/admin/timers', AdminTimeRouter)
+app.use('/api/store_front/timers', StoreFrontRouter)
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
   return res
     .status(200)
