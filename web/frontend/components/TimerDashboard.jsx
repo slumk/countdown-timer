@@ -105,7 +105,7 @@ export default function TimerDashboard() {
             content: "Create timer",
             onAction: () => setModalVisible(true),
           }}
-          image="https://cdn.shopify.com/s/files/1/0757/9955/files/empty-state.svg"
+          // image="https://cdn.shopify.com/s/files/1/0757/9955/files/empty-state.svg"
         >
           <p>Start by creating a new countdown timer for your promotions.</p>
         </EmptyState>

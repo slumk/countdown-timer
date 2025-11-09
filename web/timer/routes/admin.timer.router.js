@@ -10,7 +10,6 @@ const router = express.Router();
 
 /**
  * Middleware to extract storeId from header
- * (In production this will come from session, but dev uses header)
  */
 router.use(async (req, res, next) => {
   req.storeURL = req.query?.shop || res.locals?.shopify?.session?.shop
