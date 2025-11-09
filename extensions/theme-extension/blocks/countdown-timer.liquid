@@ -1,0 +1,124 @@
+{% schema %}
+{
+  "name": "Countdown Timer",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}
+
+<div id="countdown-timer-container" style="margin-top:15px; text-align:center;"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const shop = window.Shopify?.shop || window.location.hostname;
+  const base = "https://bass-cite-tickets-expenses.trycloudflare.com"; // ✅ replace with your current tunnel URL
+
+  try {
+    const res = await fetch(`${base}/api/store_front/timers/active?shop=${encodeURIComponent(shop)}`);
+    if (!res.ok) return;
+    const timer = await res.json();
+
+    if (!timer || timer.message) return;
+
+    const cleanText = (txt) => txt?.replace(/[<>]/g, "") || "";
+    const urgency = (timer.urgency || "").toLowerCase();
+
+    // Define urgency animations
+    let keyframes = "";
+    if (urgency.includes("flash")) {
+      keyframes = `
+        @keyframes flash {
+          0%, 50%, 100% { background-color: ${timer.color || "#f43f5e"}; }
+          25%, 75% { background-color: white; }
+        }
+      `;
+    } else if (urgency.includes("shake")) {
+      keyframes = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-4px); }
+          40%, 80% { transform: translateX(4px); }
+        }
+      `;
+    } else if (urgency.includes("pulse")) {
+      keyframes = `
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 ${timer.color || "rgba(244,63,94,0.5)"}; }
+          70% { box-shadow: 0 0 0 12px rgba(244,63,94,0); }
+          100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
+        }
+      `;
+    }
+
+    // Inject keyframes
+    const style = document.createElement("style");
+    style.textContent = keyframes;
+    document.head.appendChild(style);
+
+    // Create countdown container
+    const container = document.getElementById("countdown-timer-container");
+    container.innerHTML = `
+      <div id="countdown-timer-box"
+        role="timer"
+        aria-live="polite"
+        style="
+          background:#fff;
+          border-radius:12px;
+          box-shadow:0 3px 8px rgba(0,0,0,0.08);
+          padding:16px 24px;
+          display:inline-block;
+          font-family:Inter, sans-serif;
+          font-weight:600;
+          text-align:center;
+          min-width:260px;
+          transition: all 0.3s ease;
+          ${urgency.includes("flash") ? "animation:flash 1.2s infinite;" : ""}
+          ${urgency.includes("shake") ? "animation:shake 0.5s infinite;" : ""}
+          ${urgency.includes("pulse") ? "animation:pulse 2s infinite;" : ""}
+        "
+      >
+        ${timer.title ? `<div style="font-size:16px;font-weight:700;color:#000;margin-bottom:6px;">${cleanText(timer.title)}</div>` : ""}
+        ${timer.description ? `<div style="font-size:13px;color:#333;margin-bottom:10px;">${cleanText(timer.description)}</div>` : ""}
+        <div id="countdown-display" style="font-size:20px;color:#000;">
+          --
+        </div>
+      </div>
+    `;
+
+    const display = container.querySelector("#countdown-display");
+    const end = new Date(timer.endDate).getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = end - now;
+
+      if (distance <= 0) {
+        display.textContent = "Offer ended!";
+        display.style.color = "#555";
+        container.style.opacity = "0.7";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      display.textContent =
+        `${String(days).padStart(2, "0")}d : ${String(hours).padStart(2, "0")}h : ${String(minutes).padStart(2, "0")}m : ${String(seconds).padStart(2, "0")}s`;
+
+      requestAnimationFrame(updateCountdown);
+    }
+
+    requestAnimationFrame(updateCountdown);
+
+    // Place timer below Add to Cart
+    const productForm = document.querySelector("product-form, form[action*='/cart/add']");
+    if (productForm && !document.getElementById("countdown-timer-box")) {
+      productForm.insertAdjacentElement("afterend", container);
+    }
+  } catch (e) {
+    console.error("Countdown Timer failed:", e);
+  }
+});
+</script>

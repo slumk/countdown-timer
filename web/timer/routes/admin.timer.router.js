@@ -38,9 +38,9 @@ router.post("/", async (req, res) => {
 });
 
 /** PUT update timer */
-router.put("/", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const timer = await updateTimer(req.storeURL, req.body);
+    const timer = await updateTimer(req.storeURL, req.params.id, { ...req.body });
     res.json(timer);
   } catch (err) {
     res.status(400).json({ error: err.message });

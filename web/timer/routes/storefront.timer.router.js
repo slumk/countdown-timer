@@ -1,30 +1,19 @@
+// routes/storefrontTimers.js
 import express from "express";
-import { getActiveTimerForStore } from "../services/timer.service.js";
+import { getFirstActiveTimer } from "../services/timer.service.js";
 
-const StoreFrontRouter = express.Router();
+const router = express.Router()
 
-/**
- * GET /storefront/timer/active?shop=store.myshopify.com
- */
-StoreFrontRouter.get("/timer/active", async (req, res) => {
+// 🕒 Get the nearest-ending active timer
+router.get("/active", async (req, res) => {
   try {
-    const timer = await getActiveTimerForStore(req.storeUrl);
-    if (!timer) return res.json(null)
-
-    res.json({
-      id: timer._id,
-      title: timer.title,
-      description: timer.description,
-      startDate: timer.startDate,
-      endDate: timer.endDate,
-      color: timer.color,
-      size: timer.size,
-      position: timer.position,
-      urgency: timer.urgency,
-    });
+    const timer = await getFirstActiveTimer(req.query.shop)
+    if (!timer) return res.status(404).json({ message: "No active timer" })
+    res.json(timer);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error fetching active timer:", err);
+    res.status(500).json({ error: "Failed to fetch active timer" })
   }
-});
+})
 
-export default StoreFrontRouter;
+export default router;

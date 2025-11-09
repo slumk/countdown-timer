@@ -41,10 +41,21 @@ export async function getActiveTimerForStore(storeUrl) {
   });
 }
 
+export async function getFirstActiveTimer(shopUrl) {
+  const now = new Date();
+
+  return await Timer.findOne({
+    storeUrl: shopUrl,
+    startDate: { $lte: now },
+    endDate: { $gte: now },
+  }).sort({ endDate: 1 }); // nearest ending timer first
+}
+
+
 /** Update timer */
-export async function updateTimer(storeUrl, data) {
+export async function updateTimer(storeUrl, id, data) {
   validateTimerUpdate(data);
-  const timer = await Timer.findOneAndUpdate({ storeUrl }, data, { new: true });
+  const timer = await Timer.findByIdAndUpdate(id, data);
   if (!timer) throw new Error("Timer not found");
   return timer;
 }

@@ -69,7 +69,7 @@ export default function TimerDashboard() {
       setSelectedTimer(null);
       showToast(id ? "Timer updated successfully!" : "Timer created successfully!");
     } catch (err) {
-      showToast("Failed to save timer", true);
+      showToast(`Failed to save timer ${err.message ? ':' + err.message: ''}`, true);
     }
   };
 
